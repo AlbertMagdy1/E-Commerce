@@ -1,0 +1,38 @@
+.card-img-top{
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+}
+.card-text{
+    text-align: center;
+    color: darkgreen;
+    font-weight: 700;
+}
+.fantastic{
+    color: darkslategray;
+}
+
+.image-product{
+    width: 70%;
+    height: 200px;
+    object-fit: contain;
+}
+.new{
+    cursor: default;
+}
+
+.card-title{
+    text-align: center;
+    font-weight: 800;
+    font-size: 20px;
+}
+.special a{
+    cursor: default;
+    pointer-events: none;
+    color: purple;
+    text-decoration: none;
+    font-weight: 500;
+}
+.page-link{
+    font-weight: 600;
+}

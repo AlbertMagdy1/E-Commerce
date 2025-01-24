@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{user.username}}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand" href="{%url 'main'%}">E-Commerce</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                      <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                      <ul class="navbar-nav">
+                        <li class="nav-item active">
+                          <a class="nav-link" href="{%url 'main'%}">Home </a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link" href="#">Features</a>
+                        </li>
+                        <li  class="nav-item">
+                            <button id="car" type="button" class="btn btn-secondary" data-html="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+                                Cart(0)
+                              </button>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link disabled" href="#">Disabled</a>
+                        </li>
+                        <li class="nav-item">
+                            {%if user.is_authenticated%}
+                                <a class="nav-link" href="{% url 'logout'%}">Logout</a>
+                            {%else%}
+                                <a class="nav-link" href="{%url 'login'%}">Login</a>
+                            {%endif%}
+                        </li>
+                        <li class="nav-item">
+                            {%if user.is_authenticated%}
+                                <a class="nav-link" href="{% url 'profile'%}">Profile</a>
+                            {%endif%}
+                        </li>
+                      </ul>
+                    </div>
+                  </nav>
+            </div>
+        </div>
+
+    <img src="{{user.profile.image.url}}" class="mx-auto d-block" width="200px" height="200px">
+    {%if user.username%}
+        <h1 class="text-center mt-3">  {{user.username}}  </h1>
+    {%else%}
+        <h1>You are not logged in</h1>
+    {%endif%}
+</body>
+</html>
+
+<script type="text/javascript">
+    function updateCartButton() {
+        var totalItems = 0;
+        // Calculate total number of items in the cart
+        for (var itemId in cart) {
+            totalItems += cart[itemId];
+        }
+        // Update the cart button text
+        $('#car').text('Cart(' + totalItems + ')');
+    }
+
+    // Initialize cart from localStorage or create an empty cart
+    var cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : {};
+
+    // Update the cart button immediately after the page loads
+    updateCartButton();
+
+    // Event handler when 'Add to Cart' button is clicked
+    $(document).on('click', '.atc', function () {
+        console.log("Added to the cart Successfully!");
+
+        var item_id = this.id.toString();
+
+        // Load cart from localStorage, or initialize it if empty
+        cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : {};
+        var cartDetails = localStorage.getItem('cartDetails') ? JSON.parse(localStorage.getItem('cartDetails')) : {};
+
+        // Update cart item count
+        if (cart[item_id] !== undefined) {
+            cart[item_id] += 1;
+        } else {
+            cart[item_id] = 1;
+            var title = document.getElementById("nm" + item_id).innerHTML.trim();
+            var price = document.querySelector(`#nm${item_id} + .card-text`).innerHTML.trim().split("<br>")[0].replace('$', '').trim();
+            cartDetails[item_id] = { title: title , price: price};
+        }
+
+        // Save updated cart and cart details to localStorage
+        localStorage.setItem('cart', JSON.stringify(cart));
+        localStorage.setItem('cartDetails', JSON.stringify(cartDetails));
+        console.log(cartDetails);
+
+        // Update the cart button immediately
+        updateCartButton();
+    });
+
+    // Event handler when cart button is clicked
+    $(document).on('click', '#car', function () {
+        var cartString = "<h6>This is your cart</h6>";
+
+        // Retrieve cart and cart details from localStorage
+        var cart = JSON.parse(localStorage.getItem('cart')) || {};
+        var cartDetails = JSON.parse(localStorage.getItem('cartDetails')) || {};
+
+        // Generate the cart content to display in the popover
+        var cartIndex = 1;
+        if (Object.keys(cart).length == 0) {
+            cartString += 'Your cart is Empty !';
+        } else {
+            for (var x in cart) {
+                if (cartDetails[x]) {
+                    cartString += cartIndex + ". " + cartDetails[x].title + " Qty: " + cart[x] + "<br/>";
+                } else {
+                    cartString += cartIndex + ". Unknown Product ID: " + x + " Qty: " + cart[x] + "<br/>";
+                }
+                cartIndex += 1;
+            }
+            cartString += "<a href='/checkout'> <button class='btn btn-warning' id='checkout'>Checkout</button> </a>";
+        }
+
+        // Set the popover content and display it
+        $(this).attr('data-content', cartString);
+        $(this).popover('show');
+
+        // Hide the popover after 3 seconds (3000 milliseconds)
+        setTimeout(function () {
+            $(this).popover('hide');
+        }.bind(this), 3000);
+    });
+
+    // Wait until the DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", function () {
+        // Select the messages container
+        const messagesContainer = document.getElementById("messages");
+        if (messagesContainer) {
+            // Set a timeout to remove the messages after 2 seconds (2000 ms)
+            setTimeout(() => {
+                messagesContainer.style.display = "none"; // Hides the messages
+            }, 2000);
+        }
+    });
+</script>
